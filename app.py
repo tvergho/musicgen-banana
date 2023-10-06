@@ -1,15 +1,15 @@
 from potassium import Potassium, Request, Response
-
-from transformers import pipeline
+from audiocraft.models import MusicGen
 import torch
+from io import BytesIO
+import soundfile as sf
 
-app = Potassium("my_app")
+app = Potassium("musicgen_app")
 
 # @app.init runs at startup, and loads models into the app's context
 @app.init
 def init():
-    device = 0 if torch.cuda.is_available() else -1
-    model = pipeline('fill-mask', model='bert-base-uncased', device=device)
+    model = MusicGen.get_pretrained('facebook/musicgen-melody')
    
     context = {
         "model": model
@@ -22,10 +22,17 @@ def init():
 def handler(context: dict, request: Request) -> Response:
     prompt = request.json.get("prompt")
     model = context.get("model")
-    outputs = model(prompt)
+    outputs = model.generate([prompt])
+    
+    # Assuming the outputs[0] is the audio data in numpy array format.
+    audio_data = outputs[0].cpu().numpy()
+
+    buf = BytesIO()
+    sf.write(buf, audio_data, 16000, format='WAV')
+    audio_bytes = buf.getvalue()
 
     return Response(
-        json = {"outputs": outputs[0]}, 
+        json = {"audio": audio_bytes.decode('latin1'), "prompt": prompt},
         status=200
     )
 
