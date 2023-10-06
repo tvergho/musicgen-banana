@@ -33,7 +33,7 @@ def handler(context: dict, request: Request) -> Response:
     audio_values = model.generate(**inputs, max_new_tokens=256)
     
     # Assuming the outputs[0] is the audio data in numpy array format.
-    audio_data = audio_values[0].cpu().numpy()
+    audio_data = audio_values[0].cpu().numpy().astype("float32")
 
     buf = BytesIO()
     sf.write(buf, audio_data, 32000, format='WAV')
