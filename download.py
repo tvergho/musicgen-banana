@@ -2,6 +2,7 @@
 
 # In this example: A Huggingface BERT model
 from transformers import AutoProcessor, MusicgenForConditionalGeneration
+import torch
 
 def download_model():
     AutoProcessor.from_pretrained("facebook/musicgen-medium")
