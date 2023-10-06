@@ -11,6 +11,8 @@ app = Potassium("musicgen_app")
 def init():
     processor = AutoProcessor.from_pretrained("facebook/musicgen-medium")
     model = MusicgenForConditionalGeneration.from_pretrained("facebook/musicgen-medium", torch_dtype=torch.float16)
+
+    model.to("cuda")
    
     context = {
         "model": model,
@@ -30,6 +32,7 @@ def handler(context: dict, request: Request) -> Response:
         padding=True,
         return_tensors="pt",
     )
+    inputs = inputs.to("cuda")
     audio_values = model.generate(**inputs, max_new_tokens=256)
     
     # Assuming the outputs[0] is the audio data in numpy array format.
