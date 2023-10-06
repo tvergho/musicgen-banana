@@ -1,5 +1,3 @@
 potassium
 torch
 transformers
-audiocraft
-numpy>=1.22
